@@ -1,4 +1,4 @@
-name: tmplpkgdir
+name: values
 on: [push]
 
 jobs:
