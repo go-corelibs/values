@@ -15,6 +15,7 @@
 package values
 
 import (
+	"reflect"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -61,5 +62,57 @@ func Test(t *testing.T) {
 		So(TypeOf(10), ShouldEqual, "int")
 		So(TypeOf(2.5), ShouldEqual, "float64")
 		So(TypeOf(&stringerType{}), ShouldEqual, "*values.stringerType")
+	})
+
+	Convey("GetKeyedValue", t, func() {
+		m := map[string]interface{}{
+			"one": 2,
+		}
+		v, ok := GetKeyedValue("one", m)
+		So(ok, ShouldBeTrue)
+		So(v.IsValid(), ShouldBeTrue)
+		v, ok = GetKeyedValue("two", m)
+		So(ok, ShouldBeFalse)
+		So(v.IsValid(), ShouldBeFalse)
+
+		s := &struct {
+			One int
+		}{One: 2}
+		v, ok = GetKeyedValue("One", s)
+		So(ok, ShouldBeTrue)
+		So(v.IsValid(), ShouldBeTrue)
+		v, ok = GetKeyedValue("Two", s)
+		So(ok, ShouldBeFalse)
+		So(v.IsValid(), ShouldBeFalse)
+		v, ok = GetKeyedValue("One", *s)
+		So(ok, ShouldBeTrue)
+		So(v.IsValid(), ShouldBeTrue)
+		v, ok = GetKeyedValue("Two", *s)
+		So(ok, ShouldBeFalse)
+		So(v.IsValid(), ShouldBeFalse)
+	})
+
+	Convey("GetKeyedType", t, func() {
+		m := map[string]interface{}{
+			"one": true,
+		}
+		v, ok := GetKeyedType(reflect.Bool, "one", m)
+		So(ok, ShouldBeTrue)
+		So(v.IsValid(), ShouldBeTrue)
+		v, ok = GetKeyedType(reflect.Bool, "two", m)
+		So(ok, ShouldBeFalse)
+		So(v.IsValid(), ShouldBeFalse)
+	})
+
+	Convey("GetKeyedBool", t, func() {
+		m := map[string]interface{}{
+			"one": true,
+		}
+		v, ok := GetKeyedBool("one", m)
+		So(ok, ShouldBeTrue)
+		So(v, ShouldBeTrue)
+		v, ok = GetKeyedBool("two", m)
+		So(ok, ShouldBeFalse)
+		So(v, ShouldBeFalse)
 	})
 }
